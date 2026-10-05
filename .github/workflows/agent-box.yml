@@ -1,0 +1,36 @@
+# Installed from 16bit-ykiko/agent-box template. Setup steps stay before the agent-box step.
+# linux/macos/windows match this repo's CI -latest images.
+name: agent-box
+run-name: agent-box ${{ inputs.lease }}
+on:
+  push:
+    branches: [agent-box]
+  workflow_dispatch:
+    inputs:
+      lease:
+        required: true
+      pubkey:
+        required: true
+      minutes:
+        default: "340"
+      os:
+        type: choice
+        default: linux
+        options: [linux, linux-arm, macos, macos-intel, windows, windows-arm]
+permissions: {}
+jobs:
+  box:
+    if: github.event_name == 'workflow_dispatch' && github.actor == 'xflcx1991' && github.triggering_actor == 'xflcx1991'
+    runs-on: ${{ fromJSON('{"linux":"ubuntu-latest","linux-arm":"ubuntu-24.04-arm","macos":"macos-latest","macos-intel":"macos-15-intel","windows":"windows-latest","windows-arm":"windows-11-arm"}')[inputs.os] || 'ubuntu-latest' }}
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - uses: 16bit-ykiko/agent-box@1d433bb4c6ac84e877e2f9861b72fd251adee496
+        with:
+          pubkey: ${{ inputs.pubkey }}
+          minutes: ${{ inputs.minutes }}
